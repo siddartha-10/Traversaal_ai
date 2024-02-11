@@ -228,7 +228,6 @@ def main():
     user_input = st.text_input("User Input:")
     
     if st.button("Submit"):
-        
         response = get_response(user_input)
         st.text_area("Chatbot Response:", value=response['output'], height=200, max_chars=None, key=None)
     
