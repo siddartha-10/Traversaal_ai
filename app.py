@@ -5,7 +5,6 @@ import json
 import uvicorn
 from dotenv import load_dotenv
 load_dotenv()
-from fastapi import FastAPI
 from langchain.agents import AgentExecutor
 from langchain.agents.format_scratchpad import format_to_openai_function_messages
 from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
@@ -30,7 +29,6 @@ from langchain_core.tools import Tool
 from langchain_openai import ChatOpenAI
 from langchain_openai import AzureChatOpenAI
 from langchain_community.document_loaders import JSONLoader
-
 embeddings = OpenAIEmbeddings()
 llm_1 = AzureChatOpenAI(openai_api_version=os.environ.get("AZURE_OPENAI_VERSION", "2023-07-01-preview"),
         azure_deployment=os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt4chat"),
@@ -124,10 +122,11 @@ documents = loader.load()
     
 from langchain.vectorstores import FAISS
 def get_vectorstore(text_chunks):
+    embeddings = OpenAIEmbeddings()
     # Check if the FAISS index file already exists
     if os.path.exists("faiss_index"):
         # Load the existing FAISS index
-        vectorstore = FAISS.load_local("faiss_index")
+        vectorstore = FAISS.load_local("faiss_index", embeddings=embeddings)
         print("Loaded existing FAISS index.")
     else:
         # Create a new FAISS index
@@ -179,9 +178,6 @@ chain_rag_tool = Tool(name="RAG_Chain",
                       description="RAG chain for question answering."
                      )
 
-app = FastAPI(
-    title='Example',
-)
 
 tools = [chain_rag_tool, api_tool]
 llm_with_tools = llm.bind(functions=[format_tool_to_openai_function(t) for t in tools])
@@ -232,8 +228,9 @@ def main():
     user_input = st.text_input("User Input:")
     
     if st.button("Submit"):
+        
         response = get_response(user_input)
-        st.text_area("Chatbot Response:", value=response)
+        st.text_area("Chatbot Response:", value=response['output'], height=200, max_chars=None, key=None)
     
     if st.button("Exit"):
         st.stop()
