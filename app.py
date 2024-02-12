@@ -222,17 +222,22 @@ def get_response(user_input):
     return response
 
 
+# Define the Streamlit app
 def main():
-    st.title("Travle Assistant Chatbot")
-    st.write("Welcome to the Hotel Assistant Chatbot!")
-    user_input = st.text_input("User Input:")
-    
+    st.title("Chatbot")
+    user_input = st.text_input("User Input:", "")
+
     if st.button("Submit"):
         response = get_response(user_input)
-        st.text_area("Chatbot Response:", value=response['output'], height=200, max_chars=None, key=None)
-    
-    if st.button("Exit"):
-        st.stop()
+        st.text("Bot Response:")
+        st.write(response)
+
+# Function to get response from LangChain model or API
+def get_response(user_input):
+    # Example: You can choose either to use LangChain model or API
+    response = llm.invoke(user_input)
+    # response = api_call(user_input)
+    return response.content
 
 if __name__ == "__main__":
     main()
